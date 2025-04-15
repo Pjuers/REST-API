@@ -8,6 +8,24 @@ router.get("/", async (req, res) => {
   res.json(rows);
 });
 
+// Einzelnen User nach ID holen
+router.get("/:id", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const [rows] = await db.query("SELECT * FROM users WHERE id = ?", [id]); // ← pool zu db geändert
+
+    if (rows.length === 0) {
+      return res.status(404).json({ message: "User nicht gefunden" });
+    }
+
+    res.json(rows[0]);
+  } catch (err) {
+    console.error(err); // ← zeigt dir den Fehler in der Konsole
+    res.status(500).json({ error: "Datenbankfehler" });
+  }
+});
+
 // Nutzer erstellen
 router.post("/", async (req, res) => {
   const { name, email } = req.body;

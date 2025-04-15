@@ -8,6 +8,24 @@ router.get("/", async (req, res) => {
   res.json(rows);
 });
 
+// Einzelnes Produkt nach ID holen
+router.get("/:id", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const [rows] = await db.query("SELECT * FROM products WHERE id = ?", [id]); // pool -> db
+
+    if (rows.length === 0) {
+      return res.status(404).json({ message: "Produkt nicht gefunden" });
+    }
+
+    res.json(rows[0]);
+  } catch (err) {
+    console.error(err); // ← loggt den Fehler in der Konsole
+    res.status(500).json({ error: "Datenbankfehlerlakjsdfasdkf" });
+  }
+});
+
 // Produkt erstellen
 router.post("/", async (req, res) => {
   const { name, price } = req.body;

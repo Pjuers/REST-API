@@ -1,6 +1,20 @@
-version: "3.8"
-
 services:
+  db:
+    image: mysql:8
+    environment:
+      MYSQL_DATABASE: testdb
+      MYSQL_ROOT_PASSWORD: secret
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./seed.sql:/docker-entrypoint-initdb.d/seed.sql
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      interval: 5s
+      timeout: 10s
+      retries: 5
+
   api:
     build: .
     ports:
@@ -10,22 +24,11 @@ services:
       - DB_USER=root
       - DB_PASSWORD=secret
       - DB_NAME=testdb
-    depends_on:
-      - db
     volumes:
       - .:/app
-
-  db:
-    image: mysql:8.0
-    environment:
-      MYSQL_ROOT_PASSWORD: secret
-      MYSQL_DATABASE: testdb
-    ports:
-      - "3306:3306"
-    volumes:
-      - db_data:/var/lib/mysql
-      - ./seed.sql:/docker-entrypoint-initdb.d/seed.sql
+    depends_on:
+      db:
+        condition: service_healthy
 
 volumes:
   db_data:
-
